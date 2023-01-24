@@ -8,3 +8,4 @@ Non--camera stuff tow ork on: write python code to take an image (same format as
 - When we have the face, use CV2 to cut into a smaller image of just the face for emotion model to run on after
 
 
+Python: 3.6.9
