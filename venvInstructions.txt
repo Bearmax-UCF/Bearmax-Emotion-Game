@@ -1,0 +1,2 @@
+python -m venv ~/emotionGameEnv
+source ~/emotionGameEnv/bin/activate

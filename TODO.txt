@@ -9,3 +9,6 @@ Non--camera stuff tow ork on: write python code to take an image (same format as
 
 
 Python: 3.6.9
+
+
+Install all dependencies: pip install -r requirements.txt
