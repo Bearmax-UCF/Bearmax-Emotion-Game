@@ -1,2 +1,8 @@
-python -m venv ~/emotionGameEnv
+To create
+[python 3.10 interpreter] -m venv ~/emotionGameEnv
+
+To activate:
 source ~/emotionGameEnv/bin/activate
+
+Install all dependencies:
+pip install -r requirements.txt
