@@ -1,0 +1,7 @@
+- Try retinaface on autistic dataset testing and record results
+    - Consider retraining source with austistic dataset if not acceptable
+- Get pip retinaface working with camera frame inputs
+    - Draw detection box onto the screen
+        - For the first 5 seconds, grab center-most face
+        - After 5s, get the face with closest distance to last frame
+    - Show just the cropped face
