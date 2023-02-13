@@ -5,3 +5,10 @@
         - For the first 5 seconds, grab center-most face
         - After 5s, get the face with closest distance to last frame
     - Show just the cropped face
+
+CDR content
+Get the face recognizer running on the camera feed
+Crop the faces into separate images and display those
+Run the emotion recognition on each of those
+If there’s a way to check which face is the same mathematically, do that. Otherwise, get the closest face to the last frame bounds
+Implement reset function that grabs the new central face every frame the next 2s then locks on that one
