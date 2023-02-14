@@ -1,6 +1,8 @@
 To create
 [python 3.10 interpreter] -m venv ~/emotionGameEnv
 
+sudo apt-get install python3.10-venv
+
 To activate:
 source ~/emotionGameEnv/bin/activate
 

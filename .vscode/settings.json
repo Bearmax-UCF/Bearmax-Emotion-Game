@@ -1,3 +1,6 @@
 {
-    "python.analysis.typeCheckingMode": "basic"
+    "python.pythonPath": "/home/wearlabucf/emotionGameEnv/bin/python",
+    "python.linting.pylintPath": "/home/wearlabucf/emotionGameEnv/bin/pylint",
+    "python.linting.pylintEnabled": false,
+    "python.linting.enabled": false,
 }

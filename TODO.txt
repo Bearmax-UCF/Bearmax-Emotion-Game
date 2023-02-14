@@ -12,3 +12,12 @@ Crop the faces into separate images and display those
 Run the emotion recognition on each of those
 If there’s a way to check which face is the same mathematically, do that. Otherwise, get the closest face to the last frame bounds
 Implement reset function that grabs the new central face every frame the next 2s then locks on that one
+
+
+
+
+
+
+Talk with Simon to figure out what structure needs to be had here
+    - Set up an API that runs and can listen for requests from the robot
+    - Just a script that can be opened as a module and function calls to start everything
