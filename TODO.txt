@@ -1,23 +1,20 @@
-- Try retinaface on autistic dataset testing and record results
-    - Consider retraining source with austistic dataset if not acceptable
-- Get pip retinaface working with camera frame inputs
-    - Draw detection box onto the screen
-        - For the first 5 seconds, grab center-most face
-        - After 5s, get the face with closest distance to last frame
-    - Show just the cropped face
+Retina face built to run on webcam
+	- Figure out why it's so slow
+	- Build as a shared library?
+	- Otherwise, just use as a submodule and skip the test file
+
+Find a better facial recognition model to use
+
+Build up dataset for each emotion
+- Do we need anything more than cropped images?
+- Train emotion model on dataset
+- Need testing and training data
+- Ideally have two models that can be switched out easily, one for autistic individuals and one for non-autistic individuals
 
 CDR content
-Get the face recognizer running on the camera feed
-Crop the faces into separate images and display those
-Run the emotion recognition on each of those
-If there’s a way to check which face is the same mathematically, do that. Otherwise, get the closest face to the last frame bounds
-Implement reset function that grabs the new central face every frame the next 2s then locks on that one
 
+Build up the service to handle game requests
 
+Math for picking which face to choose in the frame
 
-
-
-
-Talk with Simon to figure out what structure needs to be had here
-    - Set up an API that runs and can listen for requests from the robot
-    - Just a script that can be opened as a module and function calls to start everything
+Request for re-calibrating when the user goes out of the screen
