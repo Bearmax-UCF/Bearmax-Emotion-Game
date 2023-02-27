@@ -1,1 +1,0 @@
-source ~/emotionGameEnv/bin/activate

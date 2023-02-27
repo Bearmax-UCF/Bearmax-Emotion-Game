@@ -1,20 +1,24 @@
-Retina face built to run on webcam
-	- Figure out why it's so slow
-	- Build as a shared library?
-	- Otherwise, just use as a submodule and skip the test file
-
-Find a better facial recognition model to use
-
 Build up dataset for each emotion
-- Do we need anything more than cropped images?
-- Train emotion model on dataset
-- Need testing and training data
-- Ideally have two models that can be switched out easily, one for autistic individuals and one for non-autistic individuals
-
-CDR content
+- Collect images for both sets
+- Run a face detection on each one to pull out the faces and save them
+	- Make sure to check all faces and wait for key press to save or scrap
+- Train model on this dataset
 
 Build up the service to handle game requests
+- Start game
+- Stop game
+- Start recalibration process
+- Save to database function that can be called when stopping
 
-Math for picking which face to choose in the frame
+Pass socket messages from server to script to update the mode
+- When inactive until started, active until stopped from socket messages
+- When in calibration mode, perform calibration
+	- Make robot control calls to count down?
+- When in play mode, turn into rounds-oriented system and leave place for robot control calls
+- Store play statys when in play mode
+- Have play mode call itself again when finished with one round
+- When stop message is received, send game stats back to the server and have the server save them to the database
 
-Request for re-calibrating when the user goes out of the screen
+Calibration process overview:
+- Math for picking which face to choose in the frame
+- Request for re-calibrating when the user goes out of the screen
