@@ -22,3 +22,7 @@ Pass socket messages from server to script to update the mode
 Calibration process overview:
 - Math for picking which face to choose in the frame
 - Request for re-calibrating when the user goes out of the screen
+
+
+To get ER repo, clone at top level:
+git clone https://github.com/greatsharma/Facial_Emotion_Recognition
