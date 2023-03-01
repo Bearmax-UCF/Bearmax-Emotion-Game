@@ -134,3 +134,7 @@ practice/
 autismDataset/
 
 Facial_Emotion_Recognition/
+
+CNNModel_feraligned+ck_5emo.h5
+label2text_CNNModel_feraligned+ck_5emo.pkl
+shape_predictor_68_face_landmarks.dat
