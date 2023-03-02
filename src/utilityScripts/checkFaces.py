@@ -1,51 +1,37 @@
 import cv2
-from retinaface import RetinaFace
 import matplotlib.pyplot as plt
 from glob import glob
 import os
+import dlib
 
-autisticImages = glob("autismDataset/test/autistic/*.jpg")
-nonAutisticImages = glob("autismDataset/test/non_autistic/*.jpg")
+emotions = ["happy", "angry", "sad", "neutral", "other"]
+imageType = "training"
 
-total = 0
-success = 0
+# DLIB HoG
+hog_detector = dlib.get_frontal_face_detector()
 
-for img_path in autisticImages:
-	faces = RetinaFace.extract_faces(img_path=img_path, align=True)
-	if len(faces) != 0:
-		success += 1
-		print(f"Found face in {img_path}")
-		for face in faces:
-			plt.imshow(face)
-			plt.show()
-	else:
-		print(f"No face in {img_path}")
+for emotion in emotions:
+	allImages = glob(f"{imageType}/{emotion}/*.jpg")
+	total = 0
+	success = 0
 
-	total += 1
+	for imagePath in allImages:
+		name = imagePath.split("/")[2]
+		image = cv2.imread(imagePath)
+		gray_frame= cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+		faces = hog_detector(gray_frame)
+		count = len(faces)
+		if count == 1:
+			face = faces[0]
+			print(face)
+			x, y, w, h = face.left(), face.top(), face.width(), face.height()
+			face_image = image[y:y+h, x:x+w]
+			print(f"training/{emotion}/{name}")
+			# cv2.imwrite(f"training/{emotion}/{name}", face_image)
+		else:
+			print(f"manual/{emotion}/{name}")
+			# cv2.imwrite(f"manual/{emotion}/{name}", image)
 
-print("-----------------------------")
-print(f"Found faces in {success}/{total} images of autistic children")
-print("-----------------------------")
-
-total = 0
-success = 0
-
-for img_path in nonAutisticImages:
-	faces = RetinaFace.extract_faces(img_path=img_path, align=True)
-	if len(faces) != 0:
-		success += 1
-		print(f"Found face in {img_path}")
-		for face in faces:
-			plt.imshow(face)
-			plt.show()
-	else:
-		print(f"No face in {img_path}")
-		
-	total += 1
-print("-----------------------------")
-print(f"Found faces in {success}/{total} images of non_autistic children")
-print("-----------------------------")
-
-# https://pypi.org/project/retina-face/
-# https://github.com/serengil/deepface
-# Other option: https://machinelearningmastery.com/how-to-perform-face-detection-with-classical-and-deep-learning-methods-in-python-with-keras/
+	print("-----------------------------")
+	print(f"Found faces in {success}/{total} images in {emotion} set")
+	print("-----------------------------")

@@ -1,6 +1,6 @@
 from glob import glob
 
-types = ["happy", "angry", "sad", "surprise", "neutral", "other"]
+types = ["happy", "angry", "sad", "neutral", "other"]
 
 print("\n\nEmotion\t\tTest\tTrain\tUncropped\tTotal")
 
