@@ -5,15 +5,13 @@ import os
 import dlib
 
 emotions = ["happy", "angry", "sad", "neutral", "other"]
-imageType = "training"
+imageType = "uncropped"
 
 # DLIB HoG
 hog_detector = dlib.get_frontal_face_detector()
 
 for emotion in emotions:
 	allImages = glob(f"{imageType}/{emotion}/*.jpg")
-	total = 0
-	success = 0
 
 	for imagePath in allImages:
 		name = imagePath.split("/")[2]
@@ -23,15 +21,11 @@ for emotion in emotions:
 		count = len(faces)
 		if count == 1:
 			face = faces[0]
-			print(face)
 			x, y, w, h = face.left(), face.top(), face.width(), face.height()
 			face_image = image[y:y+h, x:x+w]
-			print(f"training/{emotion}/{name}")
-			# cv2.imwrite(f"training/{emotion}/{name}", face_image)
+			try:
+				cv2.imwrite(f"training/{emotion}/x{name}", face_image)
+			except:
+				cv2.imwrite(f"manual/{emotion}/x{name}", image)
 		else:
-			print(f"manual/{emotion}/{name}")
-			# cv2.imwrite(f"manual/{emotion}/{name}", image)
-
-	print("-----------------------------")
-	print(f"Found faces in {success}/{total} images in {emotion} set")
-	print("-----------------------------")
+			cv2.imwrite(f"manual/{emotion}/x{name}", image)
