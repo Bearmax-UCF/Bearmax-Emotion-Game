@@ -74,8 +74,6 @@ if __name__ == "__main__":
 
         if detector == "dlib":
             out = dlib_detector(frame)
-        else:
-            out = dnn_detector(frame)
     
         tt += time.time() - tik
         fps = frame_count / tt
