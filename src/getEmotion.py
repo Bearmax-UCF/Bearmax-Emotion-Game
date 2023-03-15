@@ -13,7 +13,6 @@ modelName = "CNNModel_feraligned+ck_5emo"
 detector = "dlib"
 hist_eq = True
 
-# DLIB HoG
 hog_detector = dlib.get_frontal_face_detector()
 
 # Just face detection: 15FPS

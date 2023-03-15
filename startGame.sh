@@ -1,2 +1,2 @@
 cd src
-python getEmotion.py
+python tracker.py

@@ -74,7 +74,7 @@ desiredLeftEye=(0.32, 0.32)
 model = load_model("misc/" + modelName + ".h5")
 label2text = joblib.load("misc/label2text_" + modelName + ".pkl")
 
-if __name__ == "__main__":
+def runCamera():
     iswebcam = True
     vidcap=cv2.VideoCapture(0)
 
@@ -94,7 +94,7 @@ if __name__ == "__main__":
         tik = time.time()
 
         if detector == "dlib":
-            out = dlib_detector(frame)
+            dlib_detector(frame)
     
         tt += time.time() - tik
         fps = frame_count / tt
@@ -107,13 +107,6 @@ if __name__ == "__main__":
 
     cv2.destroyAllWindows()
     vidcap.release()
-
-
-
-
-
-
-
 
 def handleNewPause():
     return # TODO
@@ -128,9 +121,10 @@ if __name__ == '__main__':
         # When we confidently find a new emotion, publish to the game controller
         pubToController = rospy.Publisher("changeEmotion", String)
 
-        rospy.spin()
+        runCamera()
     except rospy.ROSInterruptException:
         pass
+
 
 '''
     # Receives frames from camera node to process here with dlib build
