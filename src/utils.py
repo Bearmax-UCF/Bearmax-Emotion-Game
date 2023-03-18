@@ -5,7 +5,7 @@ import numpy as np
 from collections import OrderedDict
 from imutils.face_utils import FaceAligner
 
-ALL_EMOTIONS = ["happy", "sad", "angry", "neutral", "other"]
+ALL_EMOTIONS = ["happy", "sad", "angry", "neutral", "other", "invalid"]
 
 face_detector = dlib.get_frontal_face_detector()
 shape_predictor = dlib.shape_predictor("misc/shape_predictor_68_face_landmarks.dat")
