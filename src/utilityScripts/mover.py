@@ -19,13 +19,14 @@ for img_path in images:
 
     parts = img_path.split("/")
     img_name = parts[len(parts) - 1]
+    if img_name[0] == 'x':
+        img_name = img_name[1:]
 
     if pressed == 49: # 1
-        print(f"verified/{emotion}/{img_name}")
-        # os.replace(img_path, f"verified/{emotion}/{img_name}")
+        os.replace(img_path, f"verified/{emotion}/{img_name}")
     elif pressed == 50:
-        print(f"manual/{emotion}/{img_name}")
-        # os.replace(img_path, f"manual/{emotion}/{img_name}")
+        os.replace(f"uncropped/{emotion}/{img_name}", f"manual/{emotion}/{img_name}")
+        os.replace(img_path, f"garbage/{emotion}/{img_name}")
     
     count+=1
     if count == 100:
