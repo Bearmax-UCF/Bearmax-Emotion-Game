@@ -3,9 +3,9 @@ from glob import glob
 import cv2
 import os
 
-emotions = ["happy", "neutral"]
+emotions = ["neutral"]
 dir = "training"
-emotion = "happy"
+emotion = "neutral"
 
 images = glob(f"{dir}/{emotion}/*.jpg")
 count = 0
