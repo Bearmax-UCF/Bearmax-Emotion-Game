@@ -14,7 +14,8 @@ import numpy as np
 from imutils.face_utils import rect_to_bb
 from tensorflow.keras.models import load_model
 from std_msgs.msg import String
-import utils
+import bearmax_emotion.emotion_lib.src.utils as utils
+from importlib.resources import path
 
 ALL_EMOTIONS = utils.ALL_EMOTIONS
 
@@ -44,6 +45,9 @@ def dlib_detector(frame):
 
     offset = 15
     x_pos,y_pos = 10,40
+    detected_emotion = "invalid"
+    detected_face_pos = (0,0,0)
+    frame_h, frame_w, _ = frame.shape
 
     faces = hog_detector(gray_frame)
     for idx, face in enumerate(faces):
@@ -62,6 +66,13 @@ def dlib_detector(frame):
         text = f"Person {idx+1}: {label2text[predicted_label]}"
         utils.draw_text_with_backgroud(frame, text, x + 5, y, font_scale=0.4)
 
+        detected_emotion = str(label2text[predicted_label]).lower()
+        detected_face_pos = (
+            round((x+(w/2))/frame_w, 3), # x
+            round((y+(h/2))/frame_h, 3), # y
+            round((w*h)/(frame_w*frame_h), 3) # z
+        )
+
         text = f"Person {idx+1} :  "
         y_pos = y_pos + 2*offset
         utils.draw_text_with_backgroud(frame, text, x_pos, y_pos, font_scale=0.3, box_coords_2=(2,-2))
@@ -70,9 +81,15 @@ def dlib_detector(frame):
             y_pos = y_pos + offset
             utils.draw_text_with_backgroud(frame, text, x_pos, y_pos, font_scale=0.3, box_coords_2=(2,-2))
 
+    return detected_emotion, detected_face_pos
+
 desiredLeftEye=(0.32, 0.32)
-model = load_model("misc/" + modelName + ".h5")
-label2text = joblib.load("misc/label2text_" + modelName + ".pkl")
+
+MODEL_PATH = str(path("bearmax_emotion.emotion_lib.src.misc", modelName + ".h5"))
+LABEL2TEXT_PATH = str(path("bearmax_emotion.emotion_lib.src.misc", "label2text_" + modelName + ".pkl"))
+
+model = load_model(MODEL_PATH)
+label2text = joblib.load(LABEL2TEXT_PATH)
 
 def runCamera():
     iswebcam = True
@@ -108,26 +125,18 @@ def runCamera():
     cv2.destroyAllWindows()
     vidcap.release()
 
-def handleNewPause():
-    return # TODO
 
-if __name__ == '__main__':
-    try:
-        rospy.init_node('gamePipeline')
+def run_pipeline(frame, frame_count, tt):
+    """This function is called by ros2 node with the frame to process"""
 
-        # Subscribes to pausePipeline topic, which either sends 'newRound' and 'recalibrate'
-        rospy.Subscriber("pausePipeline", String, handleNewPause)
+    frame = cv2.flip(frame, 1, 0)
+    tik = time.time()
 
-        # When we confidently find a new emotion, publish to the game controller
-        pubToController = rospy.Publisher("changeEmotion", String)
+    emo, fpos = dlib_detector(frame)
+    
+    tt += time.time() - tik
+    fps = frame_count / tt
+    label = f"Detector: {detector} ; Model: {modelName}; FPS: {round(fps, 2)}"
+    utils.draw_text_with_backgroud(frame, label, 10, 20, font_scale=0.35)
 
-        runCamera()
-    except rospy.ROSInterruptException:
-        pass
-
-
-'''
-    # Receives frames from camera node to process here with dlib build
-    # TODO: What type is this and where is the dlib build going to happen?
-    rospy.Subscriber("camera", String, handleNewPause)
-'''
+    return tt, frame, fpos, emo

@@ -4,11 +4,13 @@ import dlib
 import numpy as np
 from collections import OrderedDict
 from imutils.face_utils import FaceAligner
+from importlib.resources import path
 
 ALL_EMOTIONS = ["happy", "sad", "angry", "neutral", "other", "invalid"]
 
 face_detector = dlib.get_frontal_face_detector()
-shape_predictor = dlib.shape_predictor("misc/shape_predictor_68_face_landmarks.dat")
+FACE_LANDMARKS_PATH = str(path("bearmax_emotion.emotion_lib.src.misc", "shape_predictor_68_face_landmarks.dat"))
+shape_predictor = dlib.shape_predictor(FACE_LANDMARKS_PATH)
 
 key_landmarks = {
     "kl_1": list(range(17,28)),
