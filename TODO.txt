@@ -23,19 +23,11 @@ Calibration process overview:
 - Math for picking which face to choose in the frame
 - Request for re-calibrating when the user goes out of the screen
 
-
 To get ER repo, clone at top level:
 git clone https://github.com/greatsharma/Facial_Emotion_Recognition
 
-
-Image processing tasks:
-- Make sure everything is in proper folder (move as needed)
-- Crop out faces from as many of the original set as possible and save to the cropped section
-	- Any that don't have a face in there will have to do manually, save them to manual folder
-- For the uncropped set
-	- If there are multiple faces or no faces, move to manual folder
-	- If there is only one face, place it automatically in the right place
-
-
-
-	START BACK UP MOVING ALL TRAINING TO UNCROPPED
+Current TODOs:
+- Do one more pass on verified images to move any egregious missorts and then get stats
+- Finish pipeline node grabbing updated emotion only after confident change (do in lab with webcam)
+- Any other testing I can do right now
+- Start training tonight (can start to figure out setup at least until I get home)
