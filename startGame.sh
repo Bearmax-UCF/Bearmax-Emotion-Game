@@ -1,2 +1,2 @@
 cd src
-python tracker.py
+python pipelineNode.py

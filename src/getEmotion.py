@@ -18,7 +18,7 @@ hog_detector = dlib.get_frontal_face_detector()
 # Just face detection: 15FPS
 # With emotion model: 3.8FPS
 def dlib_detector(frame):
-    gray_frame= cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+    gray_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
     offset = 15
     x_pos,y_pos = 10,40

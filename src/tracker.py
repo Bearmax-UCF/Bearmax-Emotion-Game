@@ -19,7 +19,7 @@ pause_end = None
 
 # Just face detection: 15FPS
 # With emotion model: 3.8FPS
-def dlib_detector(frame):
+def getTargetFace(frame):
     global last_coords, last_dims
     gray_frame= cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     faces = hog_detector(gray_frame)

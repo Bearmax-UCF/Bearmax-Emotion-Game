@@ -25,3 +25,9 @@ Calibration process overview:
 
 To get ER repo, clone at top level:
 git clone https://github.com/greatsharma/Facial_Emotion_Recognition
+
+Current TODOs:
+- Do one more pass on verified images to move any egregious missorts and then get stats
+- Finish pipeline node grabbing updated emotion only after confident change (do in lab with webcam)
+- Any other testing I can do right now
+- Start training tonight (can start to figure out setup at least until I get home)
