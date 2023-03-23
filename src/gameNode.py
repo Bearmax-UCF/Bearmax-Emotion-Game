@@ -4,12 +4,45 @@ all nodes involved in the emotion recognition game
 '''
 
 #!/usr/bin/env python
-import rospy
-from std_msgs.msg import String
 from random import randint
-import datetime
-import requests
+from datetime import datetime
 from utils import ALL_EMOTIONS
+from dataclasses import dataclass
+from typing import Callable
+
+
+@dataclass
+class Scores:
+    happy: int = 0
+    sad: int = 0
+    angry: int = 0
+    neutral: int = 0
+    other: int = 0
+    invalid: int = 0
+
+    def increment_score(self, name: str):
+        if name not in vars(self).keys(): return
+        if not isinstance(getattr(self, name), int): return
+
+        setattr(self, name, getattr(self, name) + 1)
+
+
+@dataclass
+class State:
+    started: bool = False
+    paused: bool = True
+    current_emotion: str = "other"
+    target_emotion: str = None
+    correct: Scores
+    wrong: Scores
+
+
+@dataclass
+class FinalScore:
+    finish_time: datetime
+    correct: Scores
+    wrong: Scores
+
 
 class EmotionGame:
     '''
@@ -20,123 +53,88 @@ class EmotionGame:
     3 = Neutral
     4 = Other
     '''
+    def __init__(self, logger):
+        self.logger = logger  # The logger from ros node
+        self._callbacks = dict(new_round=[], on_win=[], on_lose=[])
+        self._state = State()
 
-    def __init__(self):
-        self.correct = [0] * len(ALL_EMOTIONS) # int[]
-        self.wrong = [0] * len(ALL_EMOTIONS) # int[]
-        self.currentEmotion = "other"
-        self.targetEmotion = None
-        self.paused = False
+    @property
+    def state(self):
+        return self._state
 
-        rospy.Subscriber("changeEmotion", String, self.handleEmotionChange)
-        rospy.Subscriber("gameControl", String, self.handleGameControl)
-
-        # Options to send: "recalibrate" (should wait 5s before picking up central face), 
-        # "newRound" (should wait Xs while tracking current face then start sending emotions)
-        self.pubToPipeline = rospy.Publisher("pausePipeline", String)
-
-        # When game ends or robot terminates, submit states to DB
-        rospy.on_shutdown(self.submitToDB)
-
-    # Listener for game actions from rest of the robot
-    def handleGameControl(self, data):
-        match data.data:
-            case "pause":
-                self.setGamePaused(True)
-            case "unpause":
-                self.setGamePaused(False)
-            case "recalibrate":
-                self.performRecalibration()
+    def start(self):
+        # Should always start with a clean state
+        self._state = State()
+        self._state.started = True
+        self._state.paused = False
     
-    def handleEmotionChange(self, data):
-        if data == None or data.data == None:
-            rospy.logerr("Could not register emotion change with data = %s", data.data)
-            return
-        
-        newEmotion = data.data.lower()
+    def pause(self):
+        self._state.paused = True
 
-        if not newEmotion in self.ALL_EMOTIONS:
-            rospy.logerr("Received emotion %s not in list of accepted emotions", newEmotion)
-            return
-        
-        if self.currentEmotion == newEmotion:
-            return
-        
-        self.currentEmotion = newEmotion
-        if newEmotion == self.targetEmotion:
-            self.roundWinRoutine()
+    def resume(self):
+        self._state.paused = False
 
-    def roundWinRoutine(self):
-        self.correct 
-        self.doFeedbackAction("positive")
-        self.chooseNewTargetEmotion()
+    def end(self) -> FinalScore:
+        self._state.started = False
+        return FinalScore(
+            datetime.now(),
+            self._state.correct,
+            self._state.wrong
+        )
+
+    def registerCallback(self, event: str, cb: Callable):
+        """ Registers a callback function for a specified event
+            @param event - One of: 'new_round', 'on_win', 'on_lose'
+            @param cb - Callback function
+        """
+        self._callbacks[event].append(cb)
+
+    def handleEmotionChange(self, emotion: str):
+        """
+            Called by ROS Node after the detected emotion
+            has been held for a sufficient amount of time.
+        """
+        if not self._state.started or self._state.paused: return
+
+        self._state.current_emotion = emotion
+
+        if emotion == self._state.target_emotion:
+            self._roundWinRoutine()
+        else:
+            self._roundLoseRoutine()
+
+    def _pushEvent(self, event: str, *args, **kwargs):
+        """ Runs the registered callback functions for an event.
+            @param event - One of: 'new_round', 'on_win', 'on_lose'
+        """
+        if not self._state.started or self._state.paused:
+            return # Don't push events when game is not active
+
+        for cb in self._callbacks.get(event, []):
+            cb(*args, **kwargs)
+
+    def _newRound(self):
+        self._pushEvent("new_round")
+        self.logger.info("Started new Round!")
+
+    def _roundWinRoutine(self):
+        self._state.correct.increment_score(self._state.target_emotion)
+        self._pushEvent("on_win")
+        self._chooseNewTargetEmotion()
     
-    def roundLoseRoutine(self):
-        self.doFeedbackAction("negative")
-        self.chooseNewTargetEmotion()
-    
-    def doFeedbackAction(self, feedbackType):
-        if feedbackType == "positive":
-            return # TODO
-        elif feedbackType == "negative":
-            return # TODO
+    def _roundLoseRoutine(self):
+        self._state.wrong.increment_score(self._state.target_emotion)
+        self._pushEvent("on_lose",
+                        detected_emotion=self._state.current_emotion,
+                        target_emotion=self._state.target_emotion)
+        self._chooseNewTargetEmotion()
 
-    def chooseNewTargetEmotion(self):
-        prev = self.ALL_EMOTIONS.index(self.targetEmotion)
+    def _chooseNewTargetEmotion(self):
+        prev = ALL_EMOTIONS.index(self._state.target_emotion)
         next = prev
         
         while next == prev:
-            next = randint(0, len(self.ALL_EMOTIONS) - 1)
+            next = randint(0, len(ALL_EMOTIONS) - 1)
 
-        self.targetEmotion = self.ALL_EMOTIONS[next]
-        self.pubToPipeline.publish("newRound")
-    
-    def setGamePaused(self, newVal):
-        self.paused = newVal
-    
-    def performRecalibration(self):
-        # Pause game, ask pipeline to recalibrate after X seconds, unpause
-        self.setGamePaused(True)
-        self.currentEmotion = None
-        self.chooseNewTargetEmotion()
-        self.pubToPipeline.publish("recalibrate")
-        self.setGamePaused(False)
-
-    def submitToDB(self):
-        '''
-        {
-            Correct: int[],
-            Wrong: int[],
-            GameFin: String,
-        }
-        '''
-        # TODO: Update this format when Rachel gives me the format
-        gameFin = datetime.datetime.now().strftime("%I:%M%p on %B %d, %Y")
-        data = {
-            'Correct': self.correct,
-            'Wrong': self.wrong,
-            'GameFin': gameFin
-        }
-        requests.POST("", data) # TODO: Update URL and any headers needed
-
-'''
-TODO
-Instantiate new class
-Start up ROS node
-Set up subscribers to:
-    - Current emotion changes
-    - Remediation pause/unpause
-Set up publisher to pipeline node to:
-    - Wait X seconds to recalibrate
-    - Reset for a new round (delay and reset current emotion)
-        - Both should be the same channel but different values
-On node teardown, submit class stats to DB
-'''
-
-if __name__ == '__main__':
-    try:
-        rospy.init_node('gameNode')
-        gameInstance = EmotionGame()
-        rospy.spin()
-    except rospy.ROSInterruptException:
-        pass
+        self._state.target_emotion = ALL_EMOTIONS[next]
+        self._newRound()
