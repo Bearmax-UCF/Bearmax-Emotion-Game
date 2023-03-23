@@ -77,7 +77,7 @@ def getEmotion(frame):
         x, y, w, h = rect_to_bb(last_face)
         # Green = last face we saw that was valid in a previous frame
         cv2.rectangle(frame, (x,y), (x+w,y+h), (0,255,0), 2)
-        return None, None
+        return "invalid", (0,0,0)
     
     last_coords = closest
     last_face = closest_face
