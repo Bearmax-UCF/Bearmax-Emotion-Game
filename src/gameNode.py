@@ -1,14 +1,17 @@
 '''
-Handles communication with outside system and operates 
+Handles communication with outside system and operates
 all nodes involved in the emotion recognition game
 '''
 
 #!/usr/bin/env python
 from random import randint
 from datetime import datetime
-from utils import ALL_EMOTIONS
 from dataclasses import dataclass
 from typing import Callable
+import json
+
+import bearmax_emotion.emotion_lib.src.utils as utils
+ALL_EMOTIONS = utils.ALL_EMOTIONS
 
 
 @dataclass
@@ -28,6 +31,9 @@ class Scores:
 
         setattr(self, name, getattr(self, name) + 1)
 
+    def to_list(self):
+        return [self.happy, self.sad, self.angry, self.neutral]
+
 
 @dataclass
 class State:
@@ -35,8 +41,8 @@ class State:
     paused: bool = True
     current_emotion: str = "other"
     target_emotion: str = None
-    correct: Scores
-    wrong: Scores
+    correct: Scores = Scores()
+    wrong: Scores = Scores()
 
 
 @dataclass
@@ -44,6 +50,13 @@ class FinalScore:
     finish_time: datetime
     correct: Scores
     wrong: Scores
+
+    def to_json_str(self):
+        return json.dumps({
+            "Game_Fin": str(self.finish_time),
+            "Correct:": self.correct.to_list(),
+            "Wrong": self.wrong.to_list(),
+        })
 
 
 class EmotionGame:
@@ -56,13 +69,12 @@ class EmotionGame:
     4 = Other
     '''
 
-    def __init__(self, logger, send_to_stack):
+    def __init__(self, logger):
         self.logger = logger  # The logger from ros node
-        self.send_to_stack = send_to_stack
-        self._callbacks = dict(new_round=[], on_win=[], on_lose=[])
+        self._callbacks = {"new_round": [], "on_win": [], "on_lose": []}
         self._state = State()
 
-    @property
+    @ property
     def state(self):
         return self._state
 
@@ -139,10 +151,10 @@ class EmotionGame:
     def _chooseNewTargetEmotion(self):
         self
         prev = ALL_EMOTIONS.index(self._state.target_emotion)
-        next = prev
+        nextTarget = prev
 
-        while next == prev:
-            next = randint(0, 3)
+        while nextTarget == prev:
+            nextTarget = randint(0, len(ALL_EMOTIONS) - 1)
 
-        self._state.target_emotion = ALL_EMOTIONS[next]
+        self._state.target_emotion = ALL_EMOTIONS[nextTarget]
         self._newRound()
