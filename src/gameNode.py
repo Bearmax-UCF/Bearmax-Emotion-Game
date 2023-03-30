@@ -21,8 +21,10 @@ class Scores:
     invalid: int = 0
 
     def increment_score(self, name: str):
-        if name not in vars(self).keys(): return
-        if not isinstance(getattr(self, name), int): return
+        if name not in vars(self).keys():
+            return
+        if not isinstance(getattr(self, name), int):
+            return
 
         setattr(self, name, getattr(self, name) + 1)
 
@@ -53,8 +55,10 @@ class EmotionGame:
     3 = Neutral
     4 = Other
     '''
-    def __init__(self, logger):
+
+    def __init__(self, logger, send_to_stack):
         self.logger = logger  # The logger from ros node
+        self.send_to_stack = send_to_stack
         self._callbacks = dict(new_round=[], on_win=[], on_lose=[])
         self._state = State()
 
@@ -67,7 +71,7 @@ class EmotionGame:
         self._state = State()
         self._state.started = True
         self._state.paused = False
-    
+
     def pause(self):
         self._state.paused = True
 
@@ -94,7 +98,8 @@ class EmotionGame:
             Called by ROS Node after the detected emotion
             has been held for a sufficient amount of time.
         """
-        if not self._state.started or self._state.paused: return
+        if not self._state.started or self._state.paused:
+            return
 
         self._state.current_emotion = emotion
 
@@ -108,7 +113,7 @@ class EmotionGame:
             @param event - One of: 'new_round', 'on_win', 'on_lose'
         """
         if not self._state.started or self._state.paused:
-            return # Don't push events when game is not active
+            return  # Don't push events when game is not active
 
         for cb in self._callbacks.get(event, []):
             cb(*args, **kwargs)
@@ -116,12 +121,14 @@ class EmotionGame:
     def _newRound(self):
         self._pushEvent("new_round")
         self.logger.info("Started new Round!")
+        self.send_to_stack(
+            "speak", "Let's pretend to be {self._state.target_emotion}")
 
     def _roundWinRoutine(self):
         self._state.correct.increment_score(self._state.target_emotion)
         self._pushEvent("on_win")
         self._chooseNewTargetEmotion()
-    
+
     def _roundLoseRoutine(self):
         self._state.wrong.increment_score(self._state.target_emotion)
         self._pushEvent("on_lose",
@@ -130,11 +137,12 @@ class EmotionGame:
         self._chooseNewTargetEmotion()
 
     def _chooseNewTargetEmotion(self):
+        self
         prev = ALL_EMOTIONS.index(self._state.target_emotion)
         next = prev
-        
+
         while next == prev:
-            next = randint(0, len(ALL_EMOTIONS) - 1)
+            next = randint(0, 3)
 
         self._state.target_emotion = ALL_EMOTIONS[next]
         self._newRound()
