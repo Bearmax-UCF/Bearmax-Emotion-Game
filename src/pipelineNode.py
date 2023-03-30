@@ -19,9 +19,8 @@ from importlib.resources import path
 
 ALL_EMOTIONS = utils.ALL_EMOTIONS
 
-RECAL_DUR = 3  # sec
-NEWROUND_DUR = 1  # sec
-IGNORE_THRESH = 250  # px
+RECAL_DUR = 3 #sec
+IGNORE_THRESH = 250 #px
 
 # Emotion recognition setup
 current_emotion = "invalid"

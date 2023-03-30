@@ -4,6 +4,7 @@ all nodes involved in the emotion recognition game
 '''
 
 #!/usr/bin/env python
+import time
 from random import randint
 from datetime import datetime
 from dataclasses import dataclass
@@ -12,6 +13,8 @@ import json
 
 import bearmax_emotion.emotion_lib.src.utils as utils
 ALL_EMOTIONS = utils.ALL_EMOTIONS
+
+NEWROUND_PAUSE = 2  # sec
 
 
 @dataclass
@@ -69,9 +72,11 @@ class EmotionGame:
     4 = Other
     '''
 
-    def __init__(self, logger):
+    def __init__(self, logger, send_to_stack):
         self.logger = logger  # The logger from ros node
         self._callbacks = {"new_round": [], "on_win": [], "on_lose": []}
+        self.send_to_stack = send_to_stack
+        self._pause_start = time.time()
         self._state = State()
 
     @ property
@@ -86,6 +91,7 @@ class EmotionGame:
 
     def pause(self):
         self._state.paused = True
+        self._pause_start = time.time()
 
     def resume(self):
         self._state.paused = False
@@ -110,8 +116,14 @@ class EmotionGame:
             Called by ROS Node after the detected emotion
             has been held for a sufficient amount of time.
         """
-        if not self._state.started or self._state.paused:
+        if not self._state.started:
             return
+
+        if self._state.paused:
+            if self._pause_start <= time.time() - NEWROUND_PAUSE:
+                self.resume()
+            else:
+                return
 
         self._state.current_emotion = emotion
 
