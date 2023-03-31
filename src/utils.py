@@ -6,7 +6,7 @@ from collections import OrderedDict
 from imutils.face_utils import FaceAligner
 from importlib.resources import path
 
-ALL_EMOTIONS = ["happy", "sad", "angry", "neutral", "other", "invalid"]
+ALL_EMOTIONS = ["happy", "sad", "angry"]
 FACE_LANDMARKS_PATH = path(
     "bearmax_emotion.emotion_lib.src.misc", "shape_predictor_68_face_landmarks.dat")
 

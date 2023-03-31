@@ -78,6 +78,7 @@ class EmotionGame:
         self.send_to_stack = send_to_stack
         self._pause_start = time.time()
         self._state = State()
+        self.round_in_progress = False
 
     @ property
     def state(self):
@@ -88,6 +89,7 @@ class EmotionGame:
         self._state = State()
         self._state.started = True
         self._state.paused = False
+        self._chooseNewTargetEmotion()
 
     def pause(self):
         self._state.paused = True
@@ -118,6 +120,8 @@ class EmotionGame:
         """
         if not self._state.started:
             return
+        if not self.round_in_progress:
+            return
 
         if self._state.paused:
             if self._pause_start <= time.time() - NEWROUND_PAUSE:
@@ -129,8 +133,10 @@ class EmotionGame:
 
         if emotion == self._state.target_emotion:
             self._roundWinRoutine()
+            self.round_in_progress = False
         else:
             self._roundLoseRoutine()
+            self.round_in_progress = False
 
     def _pushEvent(self, event: str, *args, **kwargs):
         """ Runs the registered callback functions for an event.
@@ -143,30 +149,31 @@ class EmotionGame:
             cb(*args, **kwargs)
 
     def _newRound(self):
-        self._pushEvent("new_round")
-        self.logger.info("Started new Round!")
-        self.send_to_stack(
-            "speak", "Let's pretend to be {self._state.target_emotion}")
+        def cb(*_, **__):
+            self.round_in_progress = True
+        self._pushEvent("new_round", new_emotion=self._state.target_emotion, round_cb=cb)
 
     def _roundWinRoutine(self):
         self._state.correct.increment_score(self._state.target_emotion)
-        self._pushEvent("on_win")
-        self._chooseNewTargetEmotion()
+        def cb(*_, **__):
+            self._chooseNewTargetEmotion()
+        self._pushEvent("on_win", cb=cb)
 
     def _roundLoseRoutine(self):
         self._state.wrong.increment_score(self._state.target_emotion)
+        def cb(*_, **__):
+            self._chooseNewTargetEmotion()
         self._pushEvent("on_lose",
                         detected_emotion=self._state.current_emotion,
-                        target_emotion=self._state.target_emotion)
-        self._chooseNewTargetEmotion()
+                        target_emotion=self._state.target_emotion,
+                        cb=cb)
 
     def _chooseNewTargetEmotion(self):
-        self
-        prev = ALL_EMOTIONS.index(self._state.target_emotion)
+        prev = self._state.target_emotion
         nextTarget = prev
 
         while nextTarget == prev:
-            nextTarget = randint(0, len(ALL_EMOTIONS) - 1)
+            nextTarget = ALL_EMOTIONS[randint(0, len(ALL_EMOTIONS) - 1)]
 
-        self._state.target_emotion = ALL_EMOTIONS[nextTarget]
+        self._state.target_emotion = nextTarget
         self._newRound()
