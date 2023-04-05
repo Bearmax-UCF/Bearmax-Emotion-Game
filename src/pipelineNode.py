@@ -9,7 +9,6 @@ import cv2
 import dlib
 import time
 import joblib
-import argparse
 import numpy as np
 import math
 from imutils.face_utils import rect_to_bb
