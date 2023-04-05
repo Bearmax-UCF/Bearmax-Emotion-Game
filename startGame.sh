@@ -1,2 +1,2 @@
 cd src
-python3 pipelineNode.py
+python getEmotion.py
