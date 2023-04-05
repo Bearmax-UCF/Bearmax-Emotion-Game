@@ -1,2 +1,2 @@
 cd src
-python pipelineNode.py
+python3 pipelineNode.py
