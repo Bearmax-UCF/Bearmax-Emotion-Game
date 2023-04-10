@@ -16,7 +16,6 @@ ALL_EMOTIONS = utils.ALL_EMOTIONS
 
 NEWROUND_PAUSE = 2  # sec
 
-
 @dataclass
 class Scores:
     happy: int = 0
@@ -36,6 +35,9 @@ class Scores:
 
     def to_list(self):
         return [self.happy, self.sad, self.angry, self.neutral]
+    
+    def sum(self):
+        return self.happy + self.sad + self.angry + self.neutral
 
 
 @dataclass
@@ -53,12 +55,15 @@ class FinalScore:
     finish_time: datetime
     correct: Scores
     wrong: Scores
+    UserID: str
 
     def to_json_str(self):
         return json.dumps({
-            "Game_Fin": str(self.finish_time),
+            "GameFin": str(self.finish_time),
+            "NumPlays": self.correct.sum() + self.wrong.sum(),
             "Correct:": self.correct.to_list(),
             "Wrong": self.wrong.to_list(),
+            "UserID": self.UserID
         })
 
 
@@ -79,13 +84,15 @@ class EmotionGame:
         self._pause_start = time.time()
         self._state = State()
         self.round_in_progress = False
+        self.UserID = None
 
     @ property
     def state(self):
         return self._state
 
-    def start(self):
+    def start(self, UserID):
         # Should always start with a clean state
+        self.UserID = UserID
         self._state = State()
         self._state.started = True
         self._state.paused = False
@@ -101,6 +108,7 @@ class EmotionGame:
     def end(self) -> FinalScore:
         self._state.started = False
         return FinalScore(
+            self.UserID,
             datetime.now(),
             self._state.correct,
             self._state.wrong
