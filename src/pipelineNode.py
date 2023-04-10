@@ -9,8 +9,7 @@ import cv2
 import dlib
 import time
 import joblib
-import argparse
-import numpy as np
+import cupy as cp
 import math
 from imutils.face_utils import rect_to_bb
 from std_msgs.msg import String
@@ -103,7 +102,7 @@ def dlib_detector(frame, gray_frame, face):
     img_arr = utils.preprocess_img(img_arr, resize=False)
 
     predicted_proba = model.predict(img_arr)
-    predicted_label = np.argmax(predicted_proba[0])
+    predicted_label = cp.argmax(predicted_proba[0])
 
     x, y, w, h = rect_to_bb(face)
     text = f"Prediction: {label2text[predicted_label]}"
