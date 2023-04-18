@@ -1,7 +1,7 @@
 import cv2
 import math
 import dlib
-import cupy as cp
+import numpy as np
 from collections import OrderedDict
 from imutils.face_utils import FaceAligner
 from importlib.resources import path
@@ -37,8 +37,8 @@ def preprocess_img(img, resize):
     if resize:
         img = cv2.resize(img, (48, 48), interpolation=cv2.INTER_CUBIC)
     img = img / 255.
-    img = cp.expand_dims(img, axis=2)
-    img = cp.expand_dims(img, axis=0)
+    img = np.expand_dims(img, axis=2)
+    img = np.expand_dims(img, axis=0)
     return img
 
 
@@ -198,15 +198,15 @@ def extract_roi1_roi2(gray_img, landmarks):
         if i in ROI_2:
             ROI2_landmarks.append((x, y))
 
-    (x, y, w, h) = cv2.boundingRect(cp.array(ROI1_landmarks))
+    (x, y, w, h) = cv2.boundingRect(np.array(ROI1_landmarks))
     roi1 = gray_img[y:y+h, x:x+w]
     roi1 = cv2.resize(roi1, (50, 25), interpolation=cv2.INTER_CUBIC)
 
-    (x, y, w, h) = cv2.boundingRect(cp.array(ROI2_landmarks))
+    (x, y, w, h) = cv2.boundingRect(np.array(ROI2_landmarks))
     roi2 = gray_img[y:y+h, x:x+w]
     roi2 = cv2.resize(roi2, (50, 25), interpolation=cv2.INTER_CUBIC)
 
-    return cp.expand_dims(roi1, axis=2), cp.expand_dims(roi2, axis=2)
+    return np.expand_dims(roi1, axis=2), np.expand_dims(roi2, axis=2)
 
 
 def get_keylandmarks_distances(key_landmarks_coords):

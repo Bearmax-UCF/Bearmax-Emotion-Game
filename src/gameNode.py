@@ -90,7 +90,7 @@ class EmotionGame:
     def state(self):
         return self._state
 
-    def start(self, UserID):
+    def start(self, UserID: str):
         # Should always start with a clean state
         self.UserID = UserID
         self._state = State()
@@ -108,10 +108,10 @@ class EmotionGame:
     def end(self) -> FinalScore:
         self._state.started = False
         return FinalScore(
-            self.UserID,
             datetime.now(),
             self._state.correct,
-            self._state.wrong
+            self._state.wrong,
+            self.UserID or "",
         )
 
     def registerCallback(self, event: str, cb: Callable):
